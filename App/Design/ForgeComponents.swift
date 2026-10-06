@@ -1,22 +1,23 @@
 import SwiftUI
 import UIKit
 import AVFoundation
-// MARK: - Tactile press style (from SiteAgent GlassPressStyle)
+
+// MARK: - Tactile Press Style (App Store Smooth Spring)
 
 struct GlassTactileButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.965 : 1)
-            .brightness(configuration.isPressed ? 0.045 : 0)
-            .animation(.spring(response: 0.20, dampingFraction: 0.82), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .animation(.spring(response: 0.22, dampingFraction: 0.80), value: configuration.isPressed)
     }
 }
 
-// MARK: - Text primitives
+// MARK: - Text Primitives (Adapted from Mono/Technical to SF Rounded & SF Pro)
 
-/// Small monospaced caption — key text style for values & badges.
+/// Clean metadata caption (replaces raw technical monospace with App Store rounded/clean type).
 struct MonoText: View {
     let text: String
     var size: CGFloat = 11
@@ -28,13 +29,13 @@ struct MonoText: View {
 
     var body: some View {
         Text(LocalizedStringKey(text))
-            .font(T.mono(size, weight))
+            .font(.system(size: size, weight: weight, design: .rounded))
             .foregroundColor(color ?? T.ink2)
             .tracking(tracking)
     }
 }
 
-/// Uppercase section header label in ink3.
+/// Section header label styled after App Store category & group headers.
 struct CaptionText: View {
     let text: String
     var color: Color? = nil
@@ -43,42 +44,38 @@ struct CaptionText: View {
 
     var body: some View {
         Text(LocalizedStringKey(text))
-            .textCase(.uppercase)
-            .font(T.sans(11, .bold))
-            .foregroundColor(color ?? T.ink3)
-            .tracking(0.4)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(color ?? Color(uiColor: .secondaryLabel))
     }
 }
 
 // MARK: - Buttons
 
-/// Primary action button with colorless glass hero surface.
+/// Primary action button — Apple App Store solid blue CTA button.
 struct GlassPrimaryButton: View {
     let label: String
     var systemImage: String? = nil
     var action: () -> Void = {}
     var disabled: Bool = false
 
-    @Environment(\.forgeTheme) private var T
-
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if let systemImage {
                     Image(systemName: systemImage)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                 }
-                Text(LocalizedStringKey(label)).font(T.sans(15, .semibold))
+                Text(LocalizedStringKey(label))
+                    .font(.system(size: 16, weight: .semibold))
             }
-            .foregroundColor(T.isDark ? .white : T.ink)
-            .padding(.horizontal, 16)
-            .frame(height: 52)
+            .foregroundColor(.white)
+            .padding(.horizontal, 18)
+            .frame(height: 50)
             .frame(maxWidth: .infinity)
-            .glassSurface(.button)
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(T.rule2, lineWidth: AppStroke.hairline)
-            }
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(uiColor: .systemBlue))
+            )
             .opacity(disabled ? 0.45 : 1)
         }
         .buttonStyle(GlassTactileButtonStyle())
@@ -86,7 +83,7 @@ struct GlassPrimaryButton: View {
     }
 }
 
-/// Secondary action button — glass surface + subtle hairline rule.
+/// Secondary action button — Clean App Store grouped card row button.
 struct GlassSecondaryButton: View {
     let label: String
     var systemImage: String? = nil
@@ -96,37 +93,46 @@ struct GlassSecondaryButton: View {
     @Environment(\.forgeTheme) private var T
 
     var body: some View {
+        let tintColor: Color = destructive ? Color(uiColor: .systemRed) : Color(uiColor: .systemBlue)
+
         Button(action: action) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 if let systemImage {
                     Image(systemName: systemImage)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(destructive ? T.bad : (T.isDark ? .white : T.ink))
-                        .frame(width: 40, height: 40)
-                        .fClearGlass(in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(tintColor)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                .fill(tintColor.opacity(0.12))
+                        )
                 }
                 Text(LocalizedStringKey(label))
-                    .font(T.sans(17, .bold))
-                    .foregroundColor(destructive ? T.bad : (T.isDark ? .white : T.ink))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(destructive ? Color(uiColor: .systemRed) : T.ink)
                 Spacer(minLength: 0)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Color(uiColor: .tertiaryLabel))
             }
             .padding(.horizontal, 16)
-            .frame(height: 66)
+            .frame(height: 58)
             .frame(maxWidth: .infinity)
-            // The visible glass surface includes transparent pixels; define the
-            // whole rounded card as the button's hit target, not only its text.
-            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .glassSurface(.button)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
+            )
             .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(T.rule, lineWidth: AppStroke.hairline)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.primary.opacity(0.06), lineWidth: AppStroke.hairline)
             }
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(GlassTactileButtonStyle())
     }
 }
 
-// MARK: - Section & rows (grouped glass card chrome)
+// MARK: - Section & Rows (App Store Grouped Card Chrome)
 
 struct GlassSection<Content: View>: View {
     let title: String
@@ -140,31 +146,35 @@ struct GlassSection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                CaptionText(text: title)
-                Rectangle().fill(T.rule).frame(height: 1)
+        VStack(alignment: .leading, spacing: 8) {
+            if !title.isEmpty {
+                Text(LocalizedStringKey(title))
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundColor(T.ink)
+                    .padding(.horizontal, 4)
             }
-            .padding(.bottom, 10)
 
             VStack(spacing: 0) { content() }
-                .glassSurface(.card, cornerRadius: 18)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color(uiColor: .secondarySystemGroupedBackground))
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(T.rule, lineWidth: AppStroke.hairline)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.primary.opacity(0.07), lineWidth: AppStroke.hairline)
                 }
         }
         .padding(.horizontal, T.pad)
-        .padding(.top, 24)
+        .padding(.top, 20)
     }
 }
 
-/// 1px rule divider used between rows inside a section card.
+/// Hairline inset divider matching native iOS & App Store lists.
 struct GlassRowDivider: View {
-    @Environment(\.forgeTheme) private var T
-
     var body: some View {
-        Rectangle().fill(T.rule).frame(height: 1)
+        Divider()
+            .padding(.leading, 16)
     }
 }
 
@@ -177,7 +187,9 @@ struct GlassRow<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(LocalizedStringKey(label)).font(T.sans(15, .medium)).foregroundColor(T.ink)
+            Text(LocalizedStringKey(label))
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(T.ink)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
             trailing()
@@ -187,7 +199,7 @@ struct GlassRow<Trailing: View>: View {
     }
 }
 
-/// File-picker row.
+/// File-picker row styled with an iOS settings icon badge.
 struct GlassFileRow: View {
     let icon: String
     let label: String
@@ -200,24 +212,36 @@ struct GlassFileRow: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(T.accent2)
-                    .frame(width: 40, height: 40)
-                    .fClearGlass(in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Color(uiColor: .systemBlue))
+                    .frame(width: 34, height: 34)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color(uiColor: .systemBlue).opacity(0.12))
+                    )
+
                 Text(LocalizedStringKey(label))
-                    .font(T.sans(15, .medium))
+                    .font(.system(size: 16, weight: .regular))
                     .foregroundColor(T.ink)
                     .lineLimit(1)
+
                 Spacer(minLength: 8)
-                Text(LocalizedStringKey(file?.lastPathComponent ?? "Choose…"))
-                    .font(file == nil ? T.sans(13) : T.mono(12))
-                    .foregroundColor(file == nil ? T.ink3 : T.ink2)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .frame(maxWidth: 150, alignment: .trailing)
+
+                HStack(spacing: 6) {
+                    Text(LocalizedStringKey(file?.lastPathComponent ?? "Choose…"))
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(file == nil ? Color(uiColor: .secondaryLabel) : Color(uiColor: .systemBlue))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .frame(maxWidth: 150, alignment: .trailing)
+
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(uiColor: .tertiaryLabel))
+                }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 11)
             .contentShape(Rectangle())
         }
         .buttonStyle(GlassTactileButtonStyle())
@@ -237,11 +261,16 @@ struct GlassInputRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(T.accent2)
-                .frame(width: 22)
-            Text(LocalizedStringKey(label)).font(T.sans(15, .medium)).foregroundColor(T.ink)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(Color(uiColor: .systemBlue))
+                .frame(width: 24)
+
+            Text(LocalizedStringKey(label))
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(T.ink)
+
             Spacer(minLength: 8)
+
             Group {
                 if isSecure {
                     SecureField(LocalizedStringKey(placeholder), text: $text)
@@ -252,13 +281,13 @@ struct GlassInputRow: View {
                 }
             }
             .textFieldStyle(.plain)
-            .font(T.mono(13))
+            .font(.system(size: 15, weight: .regular))
             .foregroundColor(T.ink)
             .multilineTextAlignment(.trailing)
-            .frame(maxWidth: 170)
+            .frame(maxWidth: 180)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 13)
     }
 }
 
@@ -271,45 +300,32 @@ struct GlassToggleRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(LocalizedStringKey(label)).font(T.sans(15, .medium)).foregroundColor(T.ink)
+            Text(LocalizedStringKey(label))
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(T.ink)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
             GlassToggle(isOn: $isOn)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 13)
+        .padding(.vertical, 10)
     }
 }
 
-/// Custom 32×18 glass toggle, spring-animated.
+/// Native-proportioned iOS switch toggle.
 struct GlassToggle: View {
     @Binding var isOn: Bool
 
-    @Environment(\.forgeTheme) private var T
-
     var body: some View {
-        Button {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) { isOn.toggle() }
-        } label: {
-            ZStack(alignment: isOn ? .trailing : .leading) {
-                Capsule()
-                    .fill(isOn ? T.controlTint : T.ink4.opacity(0.4))
-                    .frame(width: 32, height: 18)
-                Circle()
-                    .fill(.white)
-                    .frame(width: 14, height: 14)
-                    .shadow(color: .black.opacity(0.18), radius: 2, y: 1)
-                    .padding(.horizontal, 2)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityValue(isOn ? "on" : "off")
+        Toggle("", isOn: $isOn)
+            .labelsHidden()
+            .tint(Color(uiColor: .systemGreen))
     }
 }
 
-// MARK: - Small primitives
+// MARK: - Small Primitives
 
-/// Status pill — mono 9 semibold uppercase, colorless glass capsule.
+/// Status pill — Clean App Store rounded badge.
 struct GlassStatusPill: View {
     let text: String
     let color: Color
@@ -319,42 +335,37 @@ struct GlassStatusPill: View {
     var body: some View {
         Text(LocalizedStringKey(text))
             .textCase(.uppercase)
-            .font(T.mono(9, .semibold))
-            .tracking(0)
+            .font(.system(size: 10, weight: .bold))
             .foregroundColor(color)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
             .background {
-                Capsule().fill(color.opacity(T.isDark ? 0.16 : 0.12))
-            }
-            .overlay {
-                Capsule().stroke(color.opacity(T.isDark ? 0.40 : 0.28), lineWidth: AppStroke.hairline)
+                Capsule().fill(color.opacity(T.isDark ? 0.18 : 0.12))
             }
     }
 }
 
-/// Bordered mono tag (e.g. a bundle id or version chip).
+/// Soft rounded metadata tag (e.g. version or bundle ID).
 struct GlassTag: View {
     let text: String
-    var size: CGFloat = 10
+    var size: CGFloat = 11
 
     @Environment(\.forgeTheme) private var T
 
     var body: some View {
         Text(text)
-            .font(T.mono(size))
-            .foregroundColor(T.ink2)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 2)
-            .glassSurface(.badge)
-            .overlay {
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(T.rule, lineWidth: AppStroke.hairline)
-            }
+            .font(.system(size: size, weight: .medium, design: .rounded))
+            .foregroundColor(Color(uiColor: .secondaryLabel))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color(uiColor: .tertiarySystemFill))
+            )
     }
 }
 
-// MARK: - Glass GET control
+// MARK: - App Store "GET / OPEN" Control & Circular Download Ring
 
 @MainActor
 private final class InstallSoundPlayer {
@@ -391,39 +402,47 @@ enum ForgeInteractionFeedback {
     }
 }
 
+/// Authentic App Store circular download indicator with center stop square.
 struct InstallLoadingAnimation: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isAnimating = false
+    @State private var isSpinning = false
 
     let color: Color
 
-    init(color: Color = Color(red: 0.10, green: 0.42, blue: 0.94)) {
+    init(color: Color = Color(uiColor: .systemBlue)) {
         self.color = color
     }
 
     var body: some View {
-        HStack(spacing: 5) {
-            ForEach(0..<3, id: \.self) { index in
-                Circle()
-                    .fill(color)
-                    .frame(width: 7, height: 7)
-                    .scaleEffect(reduceMotion ? 1 : (isAnimating ? 1.12 : 0.72))
-                    .offset(y: reduceMotion ? 0 : (isAnimating ? -2 : 2))
-                    .animation(
-                        reduceMotion ? nil : .easeInOut(duration: 0.48)
-                            .repeatForever(autoreverses: true)
-                            .delay(Double(index) * 0.14),
-                        value: isAnimating
-                    )
-            }
+        ZStack {
+            // Track circle
+            Circle()
+                .stroke(color.opacity(0.22), lineWidth: 2.5)
+
+            // Spinning progress arc
+            Circle()
+                .trim(from: 0, to: 0.72)
+                .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                .rotationEffect(.degrees(isSpinning ? 360 : 0))
+                .animation(
+                    reduceMotion ? nil : .linear(duration: 0.9).repeatForever(autoreverses: false),
+                    value: isSpinning
+                )
+
+            // Iconic App Store stop square in the center
+            RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                .fill(color)
+                .frame(width: 8, height: 8)
         }
-        .frame(width: 76, height: 34)
-        .onAppear { isAnimating = !reduceMotion }
-        .onDisappear { isAnimating = false }
+        .frame(width: 28, height: 28)
+        .frame(width: 74, height: 30)
+        .onAppear { isSpinning = !reduceMotion }
+        .onDisappear { isSpinning = false }
         .accessibilityLabel("Loading")
     }
 }
 
+/// Native Apple App Store "GET" / "احصل" pill button.
 struct GlassGetButton: View {
     let isLoading: Bool
     let isInstalled: Bool
@@ -436,6 +455,11 @@ struct GlassGetButton: View {
     @State private var hapticPulse = 0
 
     var body: some View {
+        let isArabic = languageCode == AppLanguage.arabic.rawValue
+        let buttonTitle = isArabic
+            ? (isInstalled ? "فتح" : "احصل")
+            : (isInstalled ? "OPEN" : "GET")
+
         Button {
             guard !disabled else { return }
             hapticPulse &+= 1
@@ -445,47 +469,42 @@ struct GlassGetButton: View {
             }
             action()
         } label: {
-            HStack(spacing: 6) {
+            Group {
                 if isLoading {
-                    InstallLoadingAnimation()
+                    InstallLoadingAnimation(color: emphasizesText ? .white : Color(uiColor: .systemBlue))
                 } else {
-                    Text(languageCode == AppLanguage.arabic.rawValue
-                         ? (isInstalled ? "فتح" : "تثبيت")
-                         : (isInstalled ? "OPEN" : "GET"))
-                        .font(T.sans(languageCode == AppLanguage.arabic.rawValue ? 13.5 : 12.5, .heavy))
-                        .tracking(languageCode == AppLanguage.arabic.rawValue ? 0.15 : 0.25)
+                    Text(buttonTitle)
+                        .font(.system(size: isArabic ? 14 : 13.5, weight: .bold))
+                        .foregroundColor(
+                            emphasizesText
+                                ? .white
+                                : Color(uiColor: .systemBlue)
+                        )
+                        .frame(width: 74, height: 30)
+                        .background {
+                            if emphasizesText {
+                                Capsule().fill(.white.opacity(0.24))
+                            } else {
+                                Capsule().fill(Color(uiColor: .tertiarySystemFill))
+                            }
+                        }
                 }
             }
-            .foregroundColor(
-                emphasizesText
-                    ? (disabled ? Color.white.opacity(0.52) : .white)
-                    : (disabled ? T.ink4 : (T.isDark ? .white : T.ink))
-            )
-            .frame(width: 76, height: 34)
-            .background {
-                if isLoading {
-                    Capsule().fill(T.isDark ? Color.blue.opacity(0.28) : Color.blue.opacity(0.16))
-                }
-            }
-            .fPrimaryActionGlass(in: Capsule())
             .contentShape(Capsule())
         }
         .buttonStyle(GlassTactileButtonStyle())
         .disabled(disabled)
-        .opacity(disabled ? 0.52 : 1)
+        .opacity(disabled ? 0.45 : 1)
+        .animation(.easeInOut(duration: 0.18), value: isLoading)
     }
 
-    /// A single quiet glass-like confirmation sound when the loading dots begin.
-    /// It is not played for the Open state or repeated while a download is active.
     private func playDownloadStartSound() {
         ForgeInteractionFeedback.playPressSound()
     }
 }
 
-// MARK: - Navigation back control
+// MARK: - Navigation Back Control (App Store Circular Floating Button)
 
-/// Direction-aware back control used by sheets and detail screens.
-/// The entire 48pt control area is tappable, not only the chevron glyph.
 struct GlassBackButton: View {
     let action: () -> Void
     var symbolName = "chevron.backward"
@@ -497,21 +516,21 @@ struct GlassBackButton: View {
         Button(action: action) {
             Image(systemName: symbolName)
                 .flipsForRightToLeftLayoutDirection(mirrorsInRTL)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(T.isDark ? .white : .black)
-                .frame(width: 64, height: 48)
-                .fNavigationGlass(in: Capsule())
-                .contentShape(Capsule())
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(Color(uiColor: .secondaryLabel))
+                .frame(width: 34, height: 34)
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay {
+                    Circle().stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                }
         }
-        .frame(width: 64, height: 48)
-        .contentShape(Capsule())
+        .frame(width: 44, height: 44)
+        .contentShape(Circle())
         .buttonStyle(GlassTactileButtonStyle())
         .accessibilityLabel("Back")
     }
 }
 
-/// Uses the exact same Liquid Glass back control as the import application
-/// sheet, while keeping it pinned to the physical right in every language.
 struct DirectionalGlassBackButton: View {
     let action: () -> Void
 
@@ -531,8 +550,6 @@ struct DirectionalGlassBackButton: View {
 }
 
 extension View {
-    /// Places the shared back control above the navigation content instead of
-    /// inside a toolbar, preventing iOS from adding its own white glass capsule.
     func floatingGlassBackButton(action: @escaping () -> Void) -> some View {
         overlay {
             ZStack(alignment: .topTrailing) {
@@ -542,8 +559,8 @@ extension View {
                     symbolName: "chevron.right",
                     mirrorsInRTL: false
                 )
-                .padding(.top, 12)
-                .padding(.trailing, 12)
+                .padding(.top, 10)
+                .padding(.trailing, 14)
                 .zIndex(1_000)
             }
             .environment(\.layoutDirection, .leftToRight)
