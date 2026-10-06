@@ -1,6 +1,7 @@
 import SwiftUI
+import UIKit
 
-// MARK: - Color extensions for Adaptive & Hex parsing (from SiteAgent)
+// MARK: - Color extensions for Adaptive & Hex parsing
 
 extension Color {
     init(hex: String) {
@@ -28,34 +29,32 @@ extension Color {
     }
 }
 
-/// ForgeSign Colorless Glass theme — light and dark palettes.
-///
-/// Ported from SiteAgent's colorless glass design system: untinted clear
-/// Liquid Glass surfaces over an ambient backdrop, neutral high-contrast ink,
-/// and adaptive colorless control tints in both light and dark modes.
+/// Official Apple App Store Theme Palette (Light & Dark Modes)
+/// Replaces the colorless slate-glass palette with native iOS App Store colors,
+/// crisp SF Pro typography, and standard 20pt editorial margins.
 struct ForgeTheme {
     // Background layers
-    let bg: Color           // page background
-    let surface: Color      // cards
-    let surface2: Color     // secondary surface
-    let surface3: Color     // tertiary surface
+    let bg: Color           // page background (pure white / pure black)
+    let surface: Color      // primary cards (#F2F2F7 / #1C1C1E)
+    let surface2: Color     // secondary surface / pill fills (#E5E5EA / #2C2C2E)
+    let surface3: Color     // tertiary subtle surface (#F9F9FB / #141416)
 
-    // Text ink (4 levels of hierarchy)
-    let ink: Color          // primary
-    let ink2: Color         // secondary
-    let ink3: Color         // tertiary / labels
-    let ink4: Color         // disabled / subtle
+    // Text ink (4 levels of Apple HIG hierarchy)
+    let ink: Color          // primary label
+    let ink2: Color         // secondary label
+    let ink3: Color         // tertiary label
+    let ink4: Color         // quaternary / disabled label
 
-    // Borders
-    let rule: Color         // hairline
-    let rule2: Color        // stronger
+    // Borders & Dividers
+    let rule: Color         // standard App Store hairline separator
+    let rule2: Color        // emphasized border
 
-    // Brand / Neutral Accent
+    // Brand / App Store Blue Accent
     let accent: Color
     let accentSoft: Color
     let accentSofter: Color
 
-    // Semantic
+    // Semantic iOS System Colors
     let good: Color
     let warn: Color
     let bad: Color
@@ -66,92 +65,95 @@ struct ForgeTheme {
 
     let isDark: Bool
 
-    // Accent gradient anchors
+    // Accent gradient anchors (App Store Icon Blue Gradient)
     let accentHi: Color
     let accentDeep: Color
     let accentStrong: Color
 }
 
 extension ForgeTheme {
-    /// Colorless Glass Light Theme
+    /// Apple App Store Light Theme
     static let light = ForgeTheme(
-        bg:        Color(.systemGroupedBackground),
-        surface:   Color.white.opacity(0.26),
-        surface2:  Color.white.opacity(0.18),
-        surface3:  Color.white.opacity(0.10),
-        ink:       Color(red: 0.110, green: 0.110, blue: 0.118),  // #1C1C1E
-        ink2:      Color(red: 0.427, green: 0.427, blue: 0.447),  // #6D6D72
-        ink3:      Color(red: 0.557, green: 0.557, blue: 0.576),  // #8E8E93
-        ink4:      Color(red: 0.780, green: 0.780, blue: 0.800),  // #C7C7CC
-        rule:      Color.black.opacity(0.08),
-        rule2:     Color.black.opacity(0.16),
-        accent:    Color(hex: "4A5058"),
-        accentSoft:   Color(hex: "4A5058").opacity(0.10),
-        accentSofter: Color(hex: "4A5058").opacity(0.06),
-        good:      Color(red: 0.133, green: 0.545, blue: 0.302),
-        warn:      Color(red: 0.690, green: 0.424, blue: 0.047),
-        bad:       Color(red: 0.784, green: 0.118, blue: 0.196),
-        pad: 18, gap: 14,
+        bg:        Color(hex: "FFFFFF"),
+        surface:   Color(hex: "F2F2F7"),
+        surface2:  Color(hex: "E5E5EA"),
+        surface3:  Color(hex: "F9F9FB"),
+        ink:       Color(hex: "000000"),
+        ink2:      Color(hex: "636366"),
+        ink3:      Color(hex: "8E8E93"),
+        ink4:      Color(hex: "C7C7CC"),
+        rule:      Color.black.opacity(0.10),
+        rule2:     Color.black.opacity(0.18),
+        accent:    Color(hex: "007AFF"),                  // iOS System Blue
+        accentSoft:   Color(hex: "007AFF").opacity(0.12),
+        accentSofter: Color(hex: "007AFF").opacity(0.07),
+        good:      Color(hex: "34C759"),                  // iOS System Green
+        warn:      Color(hex: "FF9500"),                  // iOS System Orange
+        bad:       Color(hex: "FF3B30"),                  // iOS System Red
+        pad: 20, gap: 16,
         isDark: false,
-        accentHi:     Color(hex: "626B76"),
-        accentDeep:   Color(hex: "343940"),
-        accentStrong: Color(hex: "4A5058")
+        accentHi:     Color(hex: "26BAFC"),
+        accentDeep:   Color(hex: "0062CC"),
+        accentStrong: Color(hex: "007AFF")
     )
 
-    /// Colorless Glass Dark Theme
+    /// Apple App Store Dark Theme
     static let dark = ForgeTheme(
-        bg:        Color(.systemGroupedBackground),
-        surface:   Color.white.opacity(0.13),
-        surface2:  Color.white.opacity(0.18),
-        surface3:  Color.white.opacity(0.08),
-        ink:       Color(red: 0.929, green: 0.929, blue: 0.937),
-        ink2:      Color(red: 0.706, green: 0.706, blue: 0.729),
-        ink3:      Color(red: 0.510, green: 0.510, blue: 0.533),
-        ink4:      Color(red: 0.337, green: 0.337, blue: 0.357),
-        rule:      Color.white.opacity(0.12),
-        rule2:     Color.white.opacity(0.22),
-        accent:    Color(hex: "D7DCE3"),
-        accentSoft:   Color(hex: "D7DCE3").opacity(0.16),
-        accentSofter: Color(hex: "D7DCE3").opacity(0.09),
-        good:      Color(red: 0.392, green: 0.784, blue: 0.533),
-        warn:      Color(red: 0.898, green: 0.643, blue: 0.263),
-        bad:       Color(red: 0.902, green: 0.404, blue: 0.431),
-        pad: 18, gap: 14,
+        bg:        Color(hex: "000000"),
+        surface:   Color(hex: "1C1C1E"),
+        surface2:  Color(hex: "2C2C2E"),
+        surface3:  Color(hex: "141416"),
+        ink:       Color(hex: "FFFFFF"),
+        ink2:      Color(hex: "8E8E93"),
+        ink3:      Color(hex: "636366"),
+        ink4:      Color(hex: "48484A"),
+        rule:      Color.white.opacity(0.14),
+        rule2:     Color.white.opacity(0.24),
+        accent:    Color(hex: "0A84FF"),                  // iOS Dark Mode System Blue
+        accentSoft:   Color(hex: "0A84FF").opacity(0.18),
+        accentSofter: Color(hex: "0A84FF").opacity(0.10),
+        good:      Color(hex: "30D158"),                  // iOS Dark Mode Green
+        warn:      Color(hex: "FF9F0A"),                  // iOS Dark Mode Orange
+        bad:       Color(hex: "FF453A"),                  // iOS Dark Mode Red
+        pad: 20, gap: 16,
         isDark: true,
-        accentHi:     Color(hex: "E2E7ED"),
-        accentDeep:   Color(hex: "8A939E"),
-        accentStrong: Color(hex: "D7DCE3")
+        accentHi:     Color(hex: "40C8E0"),
+        accentDeep:   Color(hex: "0051A8"),
+        accentStrong: Color(hex: "0A84FF")
     )
 
-    /// Tint for control icons & interactive elements in colorless mode.
+    /// Tint for interactive controls, toggles, and active icons (App Store Blue).
     var controlTint: Color {
-        isDark ? Color(hex: "D7DCE3") : Color(hex: "4A5058")
+        isDark ? Color(hex: "0A84FF") : Color(hex: "007AFF")
     }
 
-    var accentStrongSoft: Color { accentStrong.opacity(isDark ? 0.18 : 0.12) }
+    var accentStrongSoft: Color {
+        accentStrong.opacity(isDark ? 0.18 : 0.12)
+    }
 
-    /// Quiet supporting glyph color.
+    /// Supporting glyph color — matches App Store blue tint for icons and actions.
     var accent2: Color {
-        isDark ? Color(hex: "D7DCE3") : Color(hex: "4A5058")
+        isDark ? Color(hex: "0A84FF") : Color(hex: "007AFF")
     }
 }
 
-// MARK: - Typography
+// MARK: - Typography (App Store SF Pro Hierarchy)
 
 extension ForgeTheme {
-    /// Display / SF Rounded heading.
-    func display(_ size: CGFloat, _ weight: Font.Weight = .semibold) -> Font {
-        .system(size: size, weight: weight, design: .rounded)
+    /// Large titles & section headers — crisp SF Pro Display (matches App Store headers).
+    func display(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
+        .system(size: size, weight: weight, design: .default)
     }
 
-    /// Sans body typography.
+    /// Standard SF Pro body & UI typography.
     func sans(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight, design: .default)
     }
 
-    /// Monospaced — pervasive for values, badges, and labels.
+    /// Metadata, version numbers, and badges — converted from monospaced to clean SF Pro
+    /// with tabular digits so numbers align cleanly like the official App Store.
     func mono(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font {
-        .system(size: size, weight: weight, design: .monospaced)
+        .system(size: size, weight: weight, design: .default).monospacedDigit()
     }
 }
 
