@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// Technical canvas grid: drawn once with Canvas.
+/// Technical canvas grid: kept for backward compatibility or optional blueprint cards.
 struct GridTexture: View {
     var spacing: CGFloat = 40
-    var color: Color = .white.opacity(0.05)
+    var color: Color = .clear
 
     var body: some View {
         Canvas { ctx, size in
+            guard color != .clear else { return }
             var path = Path()
             var x: CGFloat = 0
             while x <= size.width {
@@ -26,24 +27,43 @@ struct GridTexture: View {
     }
 }
 
-/// Ambient page canvas shared by the three main interfaces.
-/// The canvas intentionally stays uniform behind headers: no gradient bloom or
-/// material panel is applied here, so titles never acquire a rectangular halo.
+/// Primary App Store canvas shared across main tabs.
+/// Uses pure systemBackground (White in Light Mode, Pure Black in Dark Mode)
+/// to match the native Apple App Store appearance.
 struct ForgeBackdrop: View {
+    var useGroupedBackground: Bool = false
+    var ambientTint: Color? = nil
+    var showGrid: Bool = false
+
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        ZStack {
-            Color(.systemGroupedBackground)
+        ZStack(alignment: .top) {
+            // الخلفية الأساسية المطابقة لمتجر آبل
+            Color(uiColor: useGroupedBackground ? .systemGroupedBackground : .systemBackground)
 
-            GridTexture(
-                spacing: 40,
-                color: Color.primary.opacity(colorScheme == .dark ? 0.07 : 0.05)
-            )
+            // إضاءة علوية اختيارية ناعمة جداً (تستخدم في صفحات تفاصيل التطبيقات إذا توفر tintColor)
+            if let ambientTint {
+                LinearGradient(
+                    colors: [
+                        ambientTint.opacity(colorScheme == .dark ? 0.18 : 0.10),
+                        .clear
+                    ],
+                    startPoint: .top,
+                    endPoint: .init(x: 0.5, y: 0.38)
+                )
+            }
+
+            // الشبكة معطلة افتراضياً للحفاظ على مظهر App Store النظيف
+            if showGrid {
+                GridTexture(
+                    spacing: 40,
+                    color: Color.primary.opacity(colorScheme == .dark ? 0.05 : 0.03)
+                )
+            }
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
-
 }
